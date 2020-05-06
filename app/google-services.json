@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "898558548997",
+    "firebase_url": "https://expiration-date-control-af24d.firebaseio.com",
+    "project_id": "expiration-date-control-af24d",
+    "storage_bucket": "expiration-date-control-af24d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898558548997:android:2d870d274c693eb691506c",
+        "android_client_info": {
+          "package_name": "com.example.expiration_date_control"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "898558548997-e22ascqr602vffr9m6fnaqfrf7ibei1f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.expiration_date_control",
+            "certificate_hash": "82f3cc54070b94d4adafbfe4f2b426da8d2ac606"
+          }
+        },
+        {
+          "client_id": "898558548997-iumvfeueh87r3o75hn07vf0hve4furi2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmOrqNZTu4sIaIISZmn0WNDjUpg1iXQYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "898558548997-iumvfeueh87r3o75hn07vf0hve4furi2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

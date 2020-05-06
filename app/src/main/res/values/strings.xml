@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">ExpirationDateControl</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+
+    <string-array name="categories">
+        <item>Непродовольственные товары</item>
+        <item>Автотовары</item>
+        <item>Сад и огород</item>
+        <item>Детское питание</item>
+        <item>Напитки и алкоголь</item>
+        <item>Косметика и бытовая химия</item>
+        <item>Рыбный отдел</item>
+        <item>Мясной отдел</item>
+        <item>Орехи и сухофрукты</item>
+        <item>Горячие напитки</item>
+        <item>Кондитерские изделия</item>
+        <item>Консервация</item>
+        <item>Бакалея</item>
+        <item>Кулинария</item>
+        <item>Молочный отдел</item>
+        <item>Замороженные продукты</item>
+
+    </string-array>
+
+    <string-array name="values">
+        <item>шт</item>
+        <item>кг</item>
+        <item>коробок</item>
+        <item>л</item>
+    </string-array>
+
+    <string-array name="shelfLife">
+        <item>часов</item>
+        <item>суток</item>
+        <item>месяцев</item>
+        <item>лет</item>
+    </string-array>
+
+    <string-array name="days">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
