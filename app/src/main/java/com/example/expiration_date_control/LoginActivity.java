@@ -42,6 +42,8 @@ public class LoginActivity extends AppCompatActivity {
     private String mVerificationId;
     String phoneNumber,code;
 
+    int counterFor;
+
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private FirebaseAuth mAuth;
     private DatabaseReference myRef;
@@ -61,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if(mAuth.getCurrentUser() != null){
             Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+
             startActivity(intent);
         }
 
@@ -110,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void startPhoneNumberVerification(String phoneNumber) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phoneNumber,        // Phone number to verify
+                phoneNumber,        // MyProductsForRecyclerView number to verify
                 60,                 // Timeout duration
                 TimeUnit.SECONDS,   // Unit of timeout
                 this,               // Activity (for callback binding)
@@ -131,39 +134,51 @@ public class LoginActivity extends AppCompatActivity {
                             editor.putString("phoneNumber",phoneNumber);
                             editor.apply();
 
+                            counterFor = 1;
+
                             Toast.makeText(getApplicationContext(), "sign in successfull", Toast.LENGTH_SHORT).show();
                             myRef.addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     // This method is called once with the initial value and again
                                     // whenever data at this location is updated.
-                                    boolean isPhoneNumberAlreadyExists = true;
-                                    try{
-                                        dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        isPhoneNumberAlreadyExists = false;
+                                    if (counterFor == 1){
+                                        boolean isPhoneNumberAlreadyExists = false;
+
+                                        String c = "null";
+                                        try{
+                                            c = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class)+"";
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+
+                                        }
+                                        if(!c.equals("null")){
+                                            isPhoneNumberAlreadyExists = true;
+                                        }
+
+
+                                        if (!isPhoneNumberAlreadyExists){
+                                            myRef.child(phoneNumber).child("allProducts").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Непродовольственные товары").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Автотовары").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Сад и огород").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Детское питание").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Напитки и алкоголь").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Косметика и бытовая химия").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Рыбный отдел").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Мясной отдел").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Орехи и сухофрукты").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Горячие напитки").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Кондитерские изделия").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Консервация").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Бакалея").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Кулинария").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Молочный отдел").child("count").setValue(0);
+                                            myRef.child(phoneNumber).child("categories").child("Замороженные продукты").child("count").setValue(0);
+                                        }
+                                        counterFor = 0;
                                     }
 
-                                    if (!isPhoneNumberAlreadyExists){
-                                        myRef.child(phoneNumber).child("allProducts").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Непродовольственные товары").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Автотовары").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Сад и огород").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Детское питание").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Напитки и алкоголь").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Косметика и бытовая химия").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Рыбный отдел").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Мясной отдел").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Орехи и сухофрукты").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Горячие напитки").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Кондитерские изделия").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Консервация").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Бакалея").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Кулинария").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Молочный отдел").child("count").setValue(0);
-                                        myRef.child(phoneNumber).child("categories").child("Замороженные продукты").child("count").setValue(0);
-                                    }
 
                                 }
 

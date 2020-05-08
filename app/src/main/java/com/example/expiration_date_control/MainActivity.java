@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (id == R.id.nav_tools) {
                     try {
-                        fragment = (Fragment) Settings.class.newInstance();
+                        fragment = (Fragment) ImportPDF.class.newInstance();
                     } catch (IllegalAccessException | InstantiationException e) {
                         e.printStackTrace();
                     }

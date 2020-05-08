@@ -2,7 +2,9 @@ package com.example.expiration_date_control;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
@@ -13,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +26,8 @@ import android.text.TextWatcher;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -51,11 +56,16 @@ import com.google.firebase.storage.UploadTask;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.BreakIterator;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
+
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -74,6 +84,7 @@ public class AddProduct extends AppCompatActivity {
     private DatabaseReference myRef;
 
     private Uri selectedImage;
+    private Uri selectedBarCodeImage;
 
     private TextView prodDate;
     private TextView validUntil;
@@ -93,6 +104,7 @@ public class AddProduct extends AppCompatActivity {
     ImageView setValidUntil;
     ImageView setProdDate;
     ImageView setPhoto;
+    ImageView setBarCodePhoto;
 
     Button addNewProduct;
     Button cancel;
@@ -107,6 +119,8 @@ public class AddProduct extends AppCompatActivity {
     int permissionCamera;
     int permissionStorage;
 
+    String productOrBarCode;
+
     int counterFor;
 
     private static final int CAMERA_REQUEST = 0;
@@ -116,6 +130,23 @@ public class AddProduct extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AddProduct.this,MainActivity.class);
+                startActivity(intent);
+            }
+        });
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(ContextCompat.getColor(this,R.color.colorPrimaryDark));
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myRef = database.getReference("Users");
@@ -141,12 +172,12 @@ public class AddProduct extends AppCompatActivity {
 
         editTextShelfLife = findViewById(R.id.shelfLife);
         editName = findViewById(R.id.name);
-        editCode = findViewById(R.id.barCode);
         editCount = findViewById(R.id.count);
 
         setValidUntil = (ImageView) findViewById(R.id.setValidUntil);
         setProdDate = (ImageView) findViewById(R.id.setProdDate);
         setPhoto = (ImageView) findViewById(R.id.setProductPhoto);
+        setBarCodePhoto = (ImageView) findViewById(R.id.setBarCodePhoto);
 
         addNewProduct = (Button) findViewById(R.id.addNewProduct);
         cancel = (Button) findViewById(R.id.cancel);
@@ -329,16 +360,40 @@ public class AddProduct extends AppCompatActivity {
             }
         });
 
+        setBarCodePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                permissionCamera = checkSelfPermission(Manifest.permission.CAMERA);
+                permissionStorage = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (permissionCamera == PackageManager.PERMISSION_GRANTED && permissionStorage == PackageManager.PERMISSION_GRANTED) {
+
+                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                    file = FileProvider.getUriForFile(AddProduct.this, BuildConfig.APPLICATION_ID + ".provider",getOutputMediaFile());
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,  file);
+                    productOrBarCode = "barCode";
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
+                }
+                else{
+                    ActivityCompat.requestPermissions(AddProduct.this, new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                }
+
+            }
+
+        });
+
         setPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 permissionCamera = checkSelfPermission(Manifest.permission.CAMERA);
                 permissionStorage = checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                if (permissionCamera == PackageManager.PERMISSION_GRANTED || permissionStorage == PackageManager.PERMISSION_GRANTED) {
+                if (permissionCamera == PackageManager.PERMISSION_GRANTED && permissionStorage == PackageManager.PERMISSION_GRANTED) {
 
                     Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     file = FileProvider.getUriForFile(AddProduct.this, BuildConfig.APPLICATION_ID + ".provider",getOutputMediaFile());
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,  file);
+                    productOrBarCode = "product";
                     startActivityForResult(cameraIntent, CAMERA_REQUEST);
 
                 }
@@ -356,20 +411,32 @@ public class AddProduct extends AppCompatActivity {
 
 
                 final String name = editName.getText().toString();
-                final String code = editCode.getText().toString();
                 final String category = spinnerCategories.getSelectedItem().toString();
                 final String value = spinnerValues.getSelectedItem().toString();
                 final String countProd = editCount.getText().toString();
 
-                final String imagePath = "gs://expiration-date-control-af24d.appspot.com/"+phoneNumber+code; // путь до обложки
+                final String imagePath = "gs://expiration-date-control-af24d.appspot.com/"+phoneNumber+name; // путь до обложки
+                final String codeImagePath = "gs://expiration-date-control-af24d.appspot.com/"+"barcode"+phoneNumber+name; // путь до обложки
 
-                if(name.equals("") || code.equals("") || category.equals("") || value.equals("") || countProd.equals("0") || productionDate==0 || validUntilDate == 0 || selectedImage == null || editTextShelfLife.getText().toString().equals("")){
+                if(name.equals("") || category.equals("") || value.equals("") || countProd.equals("0") || productionDate==0 || validUntilDate == 0 || selectedImage == null || editTextShelfLife.getText().toString().equals("") || notificationTime == 0 || selectedBarCodeImage == null){
                     Toast.makeText(getBaseContext(),"Не все поля заполнены, пожалуйста, повторите попытку",Toast.LENGTH_LONG).show();
                 }
                 else{
                     if (selectedImage != null) {
 
-                        uploadFile(imagePath, selectedImage);
+                        try {
+                            uploadFile(imagePath, selectedImage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (selectedBarCodeImage != null) {
+
+                        try {
+                            uploadFile(codeImagePath, selectedBarCodeImage);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                     counterFor = 1;
                     myRef.addValueEventListener(new ValueEventListener() {
@@ -381,25 +448,30 @@ public class AddProduct extends AppCompatActivity {
                                 int count = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
                                 myRef.child(phoneNumber).child("allProducts").child("count").setValue(count+1);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("name").setValue(name);
-                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("barCode").setValue(code);
+                                //myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("barCode").setValue(code);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("productionDate").setValue(productionDate);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("validUntilDate").setValue(validUntilDate);
+                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("notificationTime").setValue(notificationTime);
+                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("notificationDate").setValue(notificationDate);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("category").setValue(category);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("count").setValue(countProd);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("value").setValue(value);
-                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("photoPath").setValue(imagePath);
+                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").setValue(imagePath);
 
                                 int countCategory = dataSnapshot.child(phoneNumber).child("categories").child(category).child("count").getValue(Integer.class);
                                 myRef.child(phoneNumber).child("categories").child(category).child("count").setValue(countCategory+1);
                                 myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("name").setValue(name);
-                                myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("barCode").setValue(code);
+                                //myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("barCode").setValue(code);
                                 myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("productionDate").setValue(productionDate);
                                 myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("validUntilDate").setValue(validUntilDate);
+                                myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("notificationTime").setValue(notificationTime);
+                                myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("notificationDate").setValue(notificationDate);
                                 myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("category").setValue(category);
                                 myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("count").setValue(countProd);
                                 myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("value").setValue(value);
-                                myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("photoPath").setValue(imagePath);
+                                myRef.child(phoneNumber).child("categories").child(category).child(String.valueOf(countCategory)).child("imagePath").setValue(imagePath);
                                 counterFor = 0;
+
                             }
 
 
@@ -410,6 +482,7 @@ public class AddProduct extends AppCompatActivity {
 
                         }
                     });
+
                 }
 
 
@@ -423,11 +496,17 @@ public class AddProduct extends AppCompatActivity {
 
     @Override
     protected void onActivityResult( int requestCode,  int resultCode,  Intent data) {
-        if (requestCode ==  0) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
-                selectedImage = file;
-                Toast.makeText(getBaseContext(),file+"",Toast.LENGTH_LONG).show();
-                setPhoto.setImageURI(file);
+                if (productOrBarCode.equals("product")){
+                    selectedImage = file;
+                    setPhoto.setImageURI(file);
+                }
+                if (productOrBarCode.equals("barCode")){
+                    selectedBarCodeImage = file;
+                    setBarCodePhoto.setImageURI(file);
+                }
             }
         }
     }
@@ -449,6 +528,7 @@ public class AddProduct extends AppCompatActivity {
                 String valueShelfLife = spinnerShelfLife.getSelectedItem().toString();
 
                 if (valueShelfLife.equals("часов")){
+
                     notificationDate = productionDate+(sLife*3600*1000 - daysBeforeNotification*24*3600*1000);
                     textNotificationDate.setText(DateUtils.formatDateTime(AddProduct.this,
                             productionDate+(sLife*3600*1000 - daysBeforeNotification*24*3600*1000),
@@ -457,6 +537,7 @@ public class AddProduct extends AppCompatActivity {
                     validUntil.setText(DateUtils.formatDateTime(AddProduct.this,
                             productionDate+sLife*3600*1000,
                             DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
+
                 }
                 if (valueShelfLife.equals("суток")){
                     notificationDate = productionDate+(sLife*24*3600*1000 - daysBeforeNotification*24*3600*1000);
@@ -491,7 +572,7 @@ public class AddProduct extends AppCompatActivity {
                 }
             }
         }else{
-
+            notificationDate = validUntilDate - daysBeforeNotification * 24 * 3600 * 1000;
             textNotificationDate.setText(DateUtils.formatDateTime(AddProduct.this,
                     validUntilDate - daysBeforeNotification * 24 * 3600 * 1000,
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
@@ -500,19 +581,28 @@ public class AddProduct extends AppCompatActivity {
 
 
     }
-    private void uploadFile(String path, Uri pathOfFile) {
+    private void uploadFile(String path, Uri pathOfFile) throws IOException {
         //if there is a file to upload
+
         StorageReference riversRef = mStorageRef.child(path);
 
         final ProgressDialog progressDialog = new ProgressDialog(AddProduct.this);
         progressDialog.setTitle("Uploading");
         progressDialog.show();
-        riversRef.putFile(pathOfFile)
+        progressDialog.setCancelable(false);
+
+        Bitmap bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), pathOfFile);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+        byte[] data = baos.toByteArray();
+        //uploading the image
+        riversRef.putBytes(data)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         progressDialog.dismiss();
-
+                        Intent intent = new Intent(AddProduct.this,MainActivity.class);
+                        startActivity(intent);
                         Toast.makeText(AddProduct.this, "File Uploaded ", Toast.LENGTH_LONG).show();
                     }
                 })
