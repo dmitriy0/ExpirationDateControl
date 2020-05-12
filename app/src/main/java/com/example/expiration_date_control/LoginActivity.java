@@ -159,22 +159,6 @@ public class LoginActivity extends AppCompatActivity {
 
                                         if (!isPhoneNumberAlreadyExists){
                                             myRef.child(phoneNumber).child("allProducts").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Непродовольственные товары").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Автотовары").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Сад и огород").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Детское питание").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Напитки и алкоголь").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Косметика и бытовая химия").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Рыбный отдел").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Мясной отдел").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Орехи и сухофрукты").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Горячие напитки").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Кондитерские изделия").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Консервация").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Бакалея").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Кулинария").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Молочный отдел").child("count").setValue(0);
-                                            myRef.child(phoneNumber).child("categories").child("Замороженные продукты").child("count").setValue(0);
                                         }
                                         counterFor = 0;
                                     }

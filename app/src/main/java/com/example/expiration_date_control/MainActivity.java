@@ -32,6 +32,8 @@ import android.view.Menu;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
@@ -48,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,AddProduct.class);
+                intent.putExtra("name","");
+                intent.putExtra("category","Непродовольственные товары");
+                intent.putExtra("countProd","0");
+                intent.putExtra("value","шт");
+                intent.putExtra("imagePath","");
+                intent.putExtra("barcodeImagePath","");
                 startActivity(intent);
             }
         });
@@ -90,6 +98,13 @@ public class MainActivity extends AppCompatActivity {
                 if (id == R.id.nav_products) {
                     try {
                         fragment = (Fragment) MyProducts.class.newInstance();
+                    } catch (IllegalAccessException | InstantiationException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (id == R.id.nav_send) {
+                    try {
+                        fragment = (Fragment) Send.class.newInstance();
                     } catch (IllegalAccessException | InstantiationException e) {
                         e.printStackTrace();
                     }

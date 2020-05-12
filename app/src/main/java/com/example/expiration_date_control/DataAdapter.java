@@ -1,6 +1,10 @@
 package com.example.expiration_date_control;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,20 +14,32 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.provider.MediaStore.Images.Thumbnails.getThumbnail;
+import static androidx.core.content.ContextCompat.startActivity;
 
 class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
@@ -47,16 +63,21 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    private static ArrayList<LinearLayout> cardViewArrayList = new ArrayList<>();
+
     @Override
-    public void onBindViewHolder(final DataAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final DataAdapter.ViewHolder holder, final int position) {
 
         final MyProductsForRecyclerView products = this.products.get(position);
 
+        final SharedPreferences preferences = getDefaultSharedPreferences(products.getContext());
+        final String phoneNumber = preferences.getString("phoneNumber","");
+
         context = products.getContext();
         time = products.getNotificationTime();
-        date = products.getNotificationDate();
+        date = products.getValidUntilDate();
 
-        String description = products.getName() + "" + products.getCountProd() + "" + products.getValue() + "." + "до " + DateUtils.formatDateTime(products.getContext(), date, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
+        String description = products.getName() + " " + products.getCountProd() + " " + products.getValue() + ". " + "до " + DateUtils.formatDateTime(products.getContext(), date, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
 
         holder.timeView.setText(DateUtils.formatDateTime(products.getContext(),
                 time,
@@ -66,6 +87,8 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         mStorageRef = FirebaseStorage.getInstance().getReference();
         StorageReference riversRef = mStorageRef.child(products.getImagePath());
 
+
+
         //отрисовка картинки
         riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
@@ -73,6 +96,102 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 Picasso.get().load(uri).into(holder.imageView);
             }
         });
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference myRef = database.getReference("Users");
+        holder.imageDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(products.getActivity());
+                builder.setTitle("Вы уверенны");  // заголовок
+                builder.setMessage("Удалить эту запись?"); // сообщение
+                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                int countProducts = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
+                                for (int j = products.getNumber()+1; j < countProducts;j++) {
+                                    String name = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("name").getValue(String.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("name").setValue(name);
+
+                                    String category = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("category").getValue(String.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("category").setValue(category);
+
+                                    String count = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("count").getValue(String.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("count").setValue(count);
+
+                                    String imagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("imagePath").getValue(String.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("imagePath").setValue(imagePath);
+
+                                    String value = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("value").getValue(String.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("value").setValue(value);
+
+                                    Long productionDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("productionDate").getValue(Long.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("productionDate").setValue(productionDate);
+
+                                    Long notificationDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("notificationDate").getValue(Long.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationDate").setValue(notificationDate);
+
+                                    Long validUntilDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("validUntilDate").getValue(Long.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationDate").setValue(validUntilDate);
+
+                                    Long notificationTime = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("notificationTime").getValue(Long.class);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationDate").setValue(notificationTime);
+
+                                }
+                                myRef.child(phoneNumber).child("allProducts").child("count").setValue(countProducts - 1);
+                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(products.getNumber())).removeValue();
+
+
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError error) {
+
+                            }
+                        });
+                        Toast.makeText(products.getContext(), "Запись успешно удалена",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                builder.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                });
+                builder.setCancelable(true);
+                builder.create();
+                builder.show();
+            }
+        });
+
+        holder.imageEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(products.getActivity(),AddProduct.class);
+                intent.putExtra("name",products.getName());
+                intent.putExtra("productionDate",products.getProductionDate());
+                intent.putExtra("validUntilDate",products.getValidUntilDate());
+                intent.putExtra("category",products.getCategory());
+                intent.putExtra("countProd",products.getCountProd());
+                intent.putExtra("value",products.getValue());
+                intent.putExtra("notificationDate",products.getNotificationDate());
+                intent.putExtra("notificationTime",products.getNotificationTime());
+                intent.putExtra("imagePath",products.getImagePath());
+                intent.putExtra("barcodeImagePath",products.getImagePath()+"barcode");
+                //Toast.makeText(products.getContext(),"barcode"+products.getImagePath(),Toast.LENGTH_LONG).show();
+                intent.putExtra("number",products.getNumber());
+                startActivity(products.getActivity(),intent,null);
+                
+            }
+        });
+
     }
 
     @Override
@@ -81,11 +200,14 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        final ImageView imageView;
+        final ImageView imageView, imageDelete,imageEdit;
         final TextView descriptionView, timeView;
         ViewHolder(View view){
             super(view);
+
             imageView = (ImageView)view.findViewById(R.id.productImage);
+            imageDelete = (ImageView)view.findViewById(R.id.imageViewDelete);
+            imageEdit = (ImageView)view.findViewById(R.id.imageViewEdit);
             descriptionView = (TextView) view.findViewById(R.id.description);
             timeView = (TextView) view.findViewById(R.id.notificationTime);
         }

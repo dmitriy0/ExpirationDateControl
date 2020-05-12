@@ -11,12 +11,16 @@ public class MyProductsForRecyclerView {
     private String imagePath;
     private long notificationTime;
     long notificationDate;
+    long validUntilDate;
+    private long productionDate;
+    private int number;
+    private String category;
     private Activity activity;
 
     private Context context;
 
 
-    public MyProductsForRecyclerView(String name, String countProd, String value, String imagePath, long notificationTime, long notificationDate, Context context,Activity activity){
+    public MyProductsForRecyclerView(String name, String countProd, String value, String imagePath, long notificationTime, long notificationDate,long validUntilDate, long productionDate, String category,int number, Context context,Activity activity){
 
         this.name=name;
         this.countProd = countProd;
@@ -24,8 +28,13 @@ public class MyProductsForRecyclerView {
         this.imagePath = imagePath;
         this.notificationTime = notificationTime;
         this.notificationDate = notificationDate;
+        this.validUntilDate = validUntilDate;
+        this.productionDate = productionDate;
+        this.category = category;
         this.context = context;
         this.activity = activity;
+        this.number = number;
+
 
 
     }
@@ -93,5 +102,37 @@ public class MyProductsForRecyclerView {
 
     public void setActivity(Activity activity) {
         this.activity = activity;
+    }
+
+    public long getValidUntilDate() {
+        return validUntilDate;
+    }
+
+    public void setValidUntilDate(long validUntilDate) {
+        this.validUntilDate = validUntilDate;
+    }
+
+    public long getProductionDate() {
+        return productionDate;
+    }
+
+    public void setProductionDate(long productionDate) {
+        this.productionDate = productionDate;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 }

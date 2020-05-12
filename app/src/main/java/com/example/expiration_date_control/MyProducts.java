@@ -51,11 +51,15 @@ public class MyProducts extends Fragment {
 
     private long notificationDate;
     private long notificationTime;
+    private long validUntilDate;
+    private long productionDate;
+
 
     private String value;
     private String name;
     private String imagePath;
     private String phoneNumber;
+    String category;
 
     ImageView imageNonFood;
     ImageView imageCars;
@@ -118,9 +122,11 @@ public class MyProducts extends Fragment {
 
         products  = new ArrayList<>();
         first = true;
-        displayProducts();
+
 
         productCategory = "allProducts";
+
+        displayProducts();
 
         final TextView textViewCategories = rootView.findViewById(R.id.textViewCategories);
 
@@ -310,172 +316,177 @@ public class MyProducts extends Fragment {
                 // whenever data at this location is updated.
                 if (counterFor == 1) {
 
-                    try {
-
+                    //try {
                         if (first){
                             mStorageRef = FirebaseStorage.getInstance().getReference();
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Непродовольственные товары").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Непродовольственные товары").child("0").child("imagePath").getValue(String.class)));
-                                riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageNonFood);
-                                    }
-                                });
+
+                            count = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
+
+                            for (int i = 0; i < count; i++) {
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Непродовольственные товары")){
+                                    StorageReference riversRef = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageNonFood);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Автотовары")){
+                                    StorageReference riversRef1 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageCars);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Сад и огород")){
+                                    StorageReference riversRef2 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef2.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageGarden);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Детское питание")){
+                                    StorageReference riversRef3 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef3.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageBabyFood);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Напитки и алкоголь")){
+                                    StorageReference riversRef4 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef4.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageDrinks);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Косметика и бытовая химия")){
+                                    StorageReference riversRef6 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef6.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageCosmetics);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Рыбный отдел")){
+                                    StorageReference riversRef7 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef7.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageFish);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Мясной отдел")){
+                                    StorageReference riversRef8 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef8.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageMeat);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Орехи и сухофрукты")){
+                                    StorageReference riversRef9 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef9.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageNuts);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Горячие напитки")){
+                                    StorageReference riversRef0 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef0.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageHotDrinks);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Кондитерские изделия")){
+                                    StorageReference riversRef01 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef01.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageConfectionery);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Консервация")){
+                                    StorageReference riversRef02 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef02.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageConservation);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Бакалея")){
+                                    StorageReference riversRef03 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef03.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageGrocery);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Кулинария")){
+                                    StorageReference riversRef04 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef04.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageCooking);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Молочный отдел")){
+                                    StorageReference riversRef05 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef05.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageDairy);
+                                        }
+                                    });
+                                }
+
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class).equals("Замороженные продукты")){
+                                    StorageReference riversRef06 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)));
+                                    riversRef06.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            Picasso.get().load(uri).into(imageFrozen);
+                                        }
+                                    });
+
+                                }
+
                             }
 
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Автотовары").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef1 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Автотовары").child("0").child("imagePath").getValue(String.class)));
-                                riversRef1.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageCars);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Сад и огород").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef2 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Сад и огород").child("0").child("imagePath").getValue(String.class)));
-                                riversRef2.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageGarden);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Детское питание").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef3 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Детское питание").child("0").child("imagePath").getValue(String.class)));
-                                riversRef3.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageBabyFood);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Напитки и алкоголь").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef4 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Напитки и алкоголь").child("0").child("imagePath").getValue(String.class)));
-                                riversRef4.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageDrinks);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Косметика и бытовая химия").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef6 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Косметика и бытовая химия").child("0").child("imagePath").getValue(String.class)));
-                                riversRef6.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageCosmetics);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Рыбный отдел").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef7 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Рыбный отдел").child("0").child("imagePath").getValue(String.class)));
-                                riversRef7.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageFish);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Мясной отдел").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef8 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Мясной отдел").child("0").child("imagePath").getValue(String.class)));
-                                riversRef8.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageMeat);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Орехи и сухофрукты").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef9 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Орехи и сухофрукты").child("0").child("imagePath").getValue(String.class)));
-                                riversRef9.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageNuts);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Горячие напитки").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef0 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Горячие напитки").child("0").child("imagePath").getValue(String.class)));
-                                riversRef0.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageHotDrinks);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Кондитерские изделия").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef01 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Кондитерские изделия").child("0").child("imagePath").getValue(String.class)));
-                                riversRef01.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageConfectionery);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Консервация").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef02 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Консервация").child("0").child("imagePath").getValue(String.class)));
-                                riversRef02.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageConservation);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Бакалея").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef03 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Бакалея").child("0").child("imagePath").getValue(String.class)));
-                                riversRef03.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageGrocery);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Кулинария").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef04 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Кулинария").child("0").child("imagePath").getValue(String.class)));
-                                riversRef04.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageCooking);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Молочный отдел").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef05 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Молочный отдел").child("0").child("imagePath").getValue(String.class)));
-                                riversRef05.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageDairy);
-                                    }
-                                });
-                            }
-
-                            if (dataSnapshot.child(phoneNumber).child("categories").child("Замороженные продукты").child("count").getValue(Integer.class) != 0){
-                                StorageReference riversRef06 = mStorageRef.child(Objects.requireNonNull(dataSnapshot.child(phoneNumber).child("categories").child("Замороженные продукты").child("0").child("imagePath").getValue(String.class)));
-                                riversRef06.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Picasso.get().load(uri).into(imageFrozen);
-                                    }
-                                });
-
-                            }
                             first = false;
-
                         }
 
 
@@ -490,39 +501,35 @@ public class MyProducts extends Fragment {
                                 imagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class);
                                 notificationDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("notificationDate").getValue(Long.class);
                                 notificationTime = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("notificationTime").getValue(Long.class);
-
-                                products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath,notificationTime,notificationDate,getContext(),getActivity()));
-                                DataAdapter adapter = new DataAdapter(getContext(), products);
-                                recyclerView.setAdapter(adapter);
-
-
-
+                                validUntilDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("validUntilDate").getValue(Long.class);
+                                productionDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("productionDate").getValue(Long.class);
+                                category = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class);
+                                products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath,notificationTime,notificationDate, validUntilDate, productionDate, category,i,getContext(),getActivity()));
                             }
                         }else{
-                            count = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child("count").getValue(Integer.class);
+                            count = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
 
                             for (int i = 0; i < count; i++) {
 
-                                name = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child(String.valueOf(i)).child("name").getValue(String.class);
-                                countProd = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child(String.valueOf(i)).child("count").getValue(String.class);
-                                value = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child(String.valueOf(i)).child("value").getValue(String.class);
-                                imagePath = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child(String.valueOf(i)).child("imagePath").getValue(String.class);
-                                notificationDate = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child(String.valueOf(i)).child("notificationDate").getValue(Long.class);
-                                notificationTime = dataSnapshot.child(phoneNumber).child("categories").child(productCategory).child(String.valueOf(i)).child("notificationTime").getValue(Long.class);
+                                if(productCategory.equals(dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class))){
+                                    name = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("name").getValue(String.class);
+                                    countProd = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("count").getValue(String.class);
+                                    value = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("value").getValue(String.class);
+                                    imagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class);
+                                    notificationDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("notificationDate").getValue(Long.class);
+                                    notificationTime = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("notificationTime").getValue(Long.class);
+                                    validUntilDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("validUntilDate").getValue(Long.class);
+                                    productionDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("productionDate").getValue(Long.class);
+                                    category = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class);
+                                    products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath,notificationTime,notificationDate, validUntilDate, productionDate, category,i,getContext(),getActivity()));
 
-                                products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath,notificationTime,notificationDate,getContext(),getActivity()));
-                                DataAdapter adapter = new DataAdapter(getContext(), products);
-                                recyclerView.setAdapter(adapter);
-
-
-
+                                }
                             }
-
                         }
                         Collections.sort(products, new Comparator<MyProductsForRecyclerView>() {
                             @Override
                             public int compare(MyProductsForRecyclerView myProductsForRecyclerView, MyProductsForRecyclerView t1) {
-                                return (myProductsForRecyclerView.notificationDate+"").compareTo(t1.notificationDate+"");
+                                return (myProductsForRecyclerView.validUntilDate+"").compareTo(t1.validUntilDate+"");
                             }
 
                         });
@@ -532,9 +539,9 @@ public class MyProducts extends Fragment {
 
 
 
-                    } catch (Exception e) {
-
-                    }
+                    //} catch (Exception e) {
+                        //Toast.makeText(getContext(),e+"",Toast.LENGTH_LONG).show();
+                    //}
                     counterFor = 0;
                 }
             }

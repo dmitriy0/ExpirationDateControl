@@ -1,27 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/pdf_layout"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ImportPDF">
+    tools:context=".Send">
 
     <!-- TODO: Update blank fragment layout -->
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/editFileName"
-        android:hint="Введите имя файла"/>
-
-    <Button
-        android:id="@+id/create"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Создать pdf файл">
-
-    </Button>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
@@ -30,6 +16,23 @@
         android:layout_weight="1"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/list_item">
+
     </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_weight="0"
+        android:text="Button" />
+
+    <EditText
+        android:id="@+id/editPhoneNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="phone"
+        android:text="" />
+
 
 </LinearLayout>
