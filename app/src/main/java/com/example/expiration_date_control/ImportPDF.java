@@ -1,22 +1,38 @@
 package com.example.expiration_date_control;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.format.DateUtils;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -38,6 +54,8 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -47,8 +65,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 public class ImportPDF extends Fragment {
 
@@ -89,7 +110,12 @@ public class ImportPDF extends Fragment {
 
     String filename;
 
+    Bitmap bitmap;
 
+    int permissionStorage;
+
+    ArrayList<Target> targets;
+    ArrayList<String> urls;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,7 +131,11 @@ public class ImportPDF extends Fragment {
         mStorageRef = FirebaseStorage.getInstance().getReference();
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
 
+        permissionStorage = checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionStorage != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
+        }
 
 
         final EditText editFileName = ((EditText) rootView.findViewById(R.id.editFileName));
@@ -144,13 +174,17 @@ public class ImportPDF extends Fragment {
                         validUntilDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("validUntilDate").getValue(Long.class);
                         productionDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("productionDate").getValue(Long.class);
                         category = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class);
-                        products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath,notificationTime,notificationDate, validUntilDate, productionDate, category,i,getContext(),getActivity()));                                DataAdapter adapter = new DataAdapter(getContext(), products);
+                        products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath+"barcode",notificationTime,notificationDate, validUntilDate, productionDate, category,i,getContext(),getActivity()));                                DataAdapter adapter = new DataAdapter(getContext(), products);
                         recyclerView.setAdapter(adapter);
 
 
                     }
 
                     adapter = new DataAdapterForSend(getContext(), products);
+                    LinearLayoutManager layoutManager=new LinearLayoutManager(getContext());
+                    recyclerView.setLayoutManager(layoutManager);
+                    recyclerView.setNestedScrollingEnabled(false);
+                    recyclerView.setHasFixedSize(false);
                     recyclerView.setAdapter(adapter);
 
                     for (int i = 0;i<adapter.getItemCount();i++){
@@ -177,9 +211,27 @@ public class ImportPDF extends Fragment {
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                filename = editFileName.getText().toString();
-                FILE = Environment.getExternalStorageDirectory()+File.separator+filename+".pdf";
-                generatePdf();
+                permissionStorage = checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (permissionStorage != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
+                }
+                else{
+                    filename = editFileName.getText().toString();
+                    if (!filename.equals("")){
+
+                        File dir = new File(Environment.getExternalStorageDirectory(),"folderTest");
+                        if(! dir.exists()){
+                            dir.mkdir();
+                        }
+                        FILE = dir+File.separator+filename+".pdf";
+                        generatePdf();
+                    }else{
+                        Toast.makeText(getContext(),"не все поля заполнены",Toast.LENGTH_LONG).show();
+                    }
+                }
+
+
             }
         });
 
@@ -187,16 +239,20 @@ public class ImportPDF extends Fragment {
     }
     private void generatePdf() {
 
-
+        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        progressDialog.setTitle("Создание");
+        progressDialog.show();
+        progressDialog.setCancelable(false);
         try {
             final Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(FILE));
             document.open();
 
-            final int size = adapter.getItemCount();
+            final int size = products.size();
+
             myRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                     // This method is called once with the initial value and again
                     // whenever data at this location is updated.
                     try {
@@ -219,91 +275,80 @@ public class ImportPDF extends Fragment {
                         table.addCell(c1);
 
                         final ArrayList<Integer> numbers = new ArrayList<Integer>();
-
-                        for(int i = 0;i<size;i++){
-                            final boolean isCheckBoxChecked = preferences.getBoolean(i + "", false);
-                            if (isCheckBoxChecked) {
+                        for (int i=0;i<size;i++){
+                            final boolean isCheckBoxChecked = preferences.getBoolean(i+"",false);
+                            if(isCheckBoxChecked){
                                 numbers.add(i);
                             }
                         }
+                        for (int i=0;i<size;i++) {
 
-                        for (int i = 0; i < size; i++) {
                             final boolean isCheckBoxChecked = preferences.getBoolean(i + "", false);
                             if (isCheckBoxChecked) {
-
-                                String codeImageUri = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class)+"barcode";
+                                String codeImageUri = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("imagePath").getValue(String.class) + "barcode";
                                 final String name = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("name").getValue(String.class);
                                 final String countProd = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("count").getValue(String.class);
                                 final String value = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("value").getValue(String.class);
+
                                 final Long validUntilDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("validUntilDate").getValue(Long.class);
 
-                                assert codeImageUri != null;
-                                StorageReference riversRef = mStorageRef.child(codeImageUri);
-                                final int finalI = i;
-                                riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                String encoded = preferences.getString("image"+i,"");
+                                if (!encoded.equals("")){
+                                    byte[] imageAsBytes = Base64.decode(encoded, Base64.DEFAULT);
+                                    bitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
+                                }
 
-                                        Picasso.get().load(uri).into(new Target() {
-                                            @Override
-                                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                                if (bitmap == null) {
-                                                } else {
-                                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                                    try {
-                                                        imageFromWeb = Image.getInstance(stream.toByteArray());
+                                final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                if (bitmap != null){
+                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 10, stream);
+                                }
+                                try {
+                                    if (bitmap != null){
+                                        imageFromWeb = Image.getInstance(stream.toByteArray());
 
-                                                        PdfPCell cell = new PdfPCell();
-                                                        cell.addElement(imageFromWeb);
-                                                        table.addCell(cell);
-
-
-                                                        PdfPCell cell1 = new PdfPCell(new Phrase(name, font));
-                                                        table.addCell(cell1);
-
-                                                        PdfPCell cell2 = new PdfPCell(new Phrase(DateUtils.formatDateTime(getContext(),
-                                                                validUntilDate,
-                                                                DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR), font));
-                                                        table.addCell(cell2);
-
-
-
-                                                        PdfPCell cell3 = new PdfPCell(new Phrase(countProd + " " + value, font));
-                                                        table.addCell(cell3);
-
-                                                        if(finalI == numbers.get(numbers.size()-1)){
-                                                            document.add(table);
-                                                            document.close();
-                                                            Toast.makeText(getContext(), "Файл успешно создан, путь - "+FILE, Toast.LENGTH_LONG).show();
-                                                        }
-
-
-                                                    } catch (IOException | DocumentException e) {
-                                                        Toast.makeText(getContext(), e + "", Toast.LENGTH_LONG).show();
-                                                        e.printStackTrace();
-                                                    }
-                                                }
-                                            }
-
-                                            @Override
-                                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                                            }
-
-                                            @Override
-                                            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                                            }
-                                        });
-
-
+                                        PdfPCell cell = new PdfPCell();
+                                        cell.addElement(imageFromWeb);
+                                        table.addCell(cell);
+                                    }else{
+                                        PdfPCell cell = new PdfPCell(new Phrase("что-то не так"));
+                                        table.addCell(cell);
                                     }
-                                });
+
+
+
+                                    PdfPCell cell1 = new PdfPCell(new Phrase(name, font));
+                                    table.addCell(cell1);
+                                    if (validUntilDate != null) {
+                                        PdfPCell cell2 = new PdfPCell(new Phrase(DateUtils.formatDateTime(getContext(),
+                                                validUntilDate,
+                                                DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR), font));
+                                        table.addCell(cell2);
+                                    }
+
+
+
+                                    PdfPCell cell3 = new PdfPCell(new Phrase(countProd + " " + value, font));
+                                    table.addCell(cell3);
+
+
+                                    if (i == numbers.get(numbers.size() - 1)) {
+                                        document.add(table);
+                                        document.close();
+                                        Toast.makeText(getContext(), "Файл успешно создан, путь - " + FILE, Toast.LENGTH_LONG).show();
+                                        progressDialog.dismiss();
+                                    }
+
+
+                                } catch (DocumentException e) {
+                                    Toast.makeText(getContext(), e + "", Toast.LENGTH_LONG).show();
+                                    e.printStackTrace();
+                                }
 
                             }
-
                         }
+
+
+                        progressDialog.dismiss();
 
 
                     } catch (Exception e) {
@@ -317,8 +362,11 @@ public class ImportPDF extends Fragment {
                 }
             });
 
+
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(getContext(),e+"",Toast.LENGTH_LONG).show();
+            progressDialog.dismiss();
         }
     }
 

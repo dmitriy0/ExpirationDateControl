@@ -9,27 +9,39 @@
     tools:context=".ImportPDF">
 
     <!-- TODO: Update blank fragment layout -->
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/editFileName"
-        android:hint="Введите имя файла"/>
 
-    <Button
-        android:id="@+id/create"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Создать pdf файл">
 
-    </Button>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:nestedScrollingEnabled="false"
         android:layout_weight="1"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/list_item">
     </androidx.recyclerview.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/create"
+        android:layout_width="270dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/button_gradient"
+        android:text="Создать pdf файл">
+
+    </Button>
+
+    <EditText
+        android:id="@+id/editFileName"
+        android:layout_width="270dp"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:hint="Введите имя файла" />
+
 
 </LinearLayout>

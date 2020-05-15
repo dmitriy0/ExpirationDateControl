@@ -4,20 +4,33 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="end"
-    android:padding="16dp">
+    android:background="@drawable/recycler_view_frame"
+    android:layout_marginEnd="10dp"
+    android:layout_marginTop="10dp"
+    android:padding="10dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="0"
+        android:layout_marginEnd="10dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/notificationTime"
-            android:layout_width="100dp"
+            android:layout_width="75dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center"
 
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/notificationDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_weight="1"
             android:text="TextView" />
 
         <CheckBox
@@ -31,6 +44,8 @@
 
     <TextView
         android:id="@+id/description"
+        android:gravity="center"
+        android:layout_marginStart="10dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -38,6 +53,7 @@
 
     <ImageView
         android:id="@+id/productImage"
+        android:layout_marginStart="10dp"
         android:layout_width="100dp"
         android:layout_height="100dp" />
 

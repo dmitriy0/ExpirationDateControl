@@ -140,73 +140,53 @@ public class Send extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (counterFor == 1){
                             String currentCategory = "";
-                            countProducts = dataSnapshot.child(phone).child("allProducts").child("count").getValue(Integer.class);
-                            int countMyProducts = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
-                            for (int i = 0; i < countMyProducts; i++) {
+                            try{
+                                dataSnapshot.child(phone).child("allProducts").child("count").getValue(Integer.class);
+                                countProducts = dataSnapshot.child(phone).child("allProducts").child("count").getValue(Integer.class);
+                                int countMyProducts = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
+                                for (int i = 0; i < countMyProducts; i++) {
 
-                                final MyProductsForRecyclerView sendProducts = products.get(i);
-                                final boolean isCheckBoxChecked = preferences.getBoolean(i+"",false);
-
-                                if(currentCategory.equals(sendProducts.getCategory())){
-                                    if (dataSnapshot.child(phone).child("categories").child(sendProducts.getCategory()).child("count").getValue(Integer.class)>=countProductsInCategories){
-                                        countProductsInCategories = dataSnapshot.child(phone).child("categories").child(sendProducts.getCategory()).child("count").getValue(Integer.class);
-                                    }
-                                }else{
-                                    countProductsInCategories = dataSnapshot.child(phone).child("categories").child(sendProducts.getCategory()).child("count").getValue(Integer.class);
-                                }
+                                    final MyProductsForRecyclerView sendProducts = products.get(i);
+                                    final boolean isCheckBoxChecked = preferences.getBoolean(i+"",false);
 
 
+                                    //Toast.makeText(getContext(),i+""+isCheckBoxChecked,Toast.LENGTH_LONG).show();
+                                    if (isCheckBoxChecked){
+                                        //Toast.makeText(getContext(),i+"",Toast.LENGTH_LONG).show();
+                                        isProductAlreadyExists = false;
 
-                                //Toast.makeText(getContext(),i+""+isCheckBoxChecked,Toast.LENGTH_LONG).show();
-                                if (isCheckBoxChecked){
-                                    //Toast.makeText(getContext(),i+"",Toast.LENGTH_LONG).show();
-                                    isProductAlreadyExists = false;
-
-                                    Toast.makeText(getContext(),countProducts+"",Toast.LENGTH_LONG).show();
-                                    for (int j=0;j<countProducts;j++){
-                                        if (sendProducts.getName().equals(dataSnapshot.child(phone).child("allProducts").child(j+"").child("name").getValue(String.class))){
-                                            isProductAlreadyExists = true;
+                                        for (int j=0;j<countProducts;j++){
+                                            if (sendProducts.getName().equals(dataSnapshot.child(phone).child("allProducts").child(j+"").child("name").getValue(String.class))){
+                                                isProductAlreadyExists = true;
+                                            }
                                         }
-                                    }
-                                    //Toast.makeText(getContext(),isCheckBoxChecked+""+ finalI +"",Toast.LENGTH_LONG).show();
-                                    if(!isProductAlreadyExists){
-                                        myRef.child(phone).child("allProducts").child("count").setValue(countProducts+1);
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("name").setValue(sendProducts.getName());
-                                        //myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("barCode").setValue(code);
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("productionDate").setValue(sendProducts.getProductionDate());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("validUntilDate").setValue(sendProducts.getValidUntilDate());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("notificationTime").setValue(sendProducts.getNotificationTime());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("notificationDate").setValue(sendProducts.getNotificationDate());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("category").setValue(sendProducts.getCategory());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("count").setValue(sendProducts.getCountProd());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("value").setValue(sendProducts.getValue());
-                                        myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("imagePath").setValue(sendProducts.getImagePath());
+                                        //Toast.makeText(getContext(),isCheckBoxChecked+""+ finalI +"",Toast.LENGTH_LONG).show();
+                                        if(!isProductAlreadyExists){
+                                            myRef.child(phone).child("allProducts").child("count").setValue(countProducts+1);
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("name").setValue(sendProducts.getName());
+                                            //myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("barCode").setValue(code);
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("productionDate").setValue(sendProducts.getProductionDate());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("validUntilDate").setValue(sendProducts.getValidUntilDate());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("notificationTime").setValue(sendProducts.getNotificationTime());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("notificationDate").setValue(sendProducts.getNotificationDate());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("category").setValue(sendProducts.getCategory());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("count").setValue(sendProducts.getCountProd());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("value").setValue(sendProducts.getValue());
+                                            myRef.child(phone).child("allProducts").child(String.valueOf(countProducts)).child("imagePath").setValue(sendProducts.getImagePath());
 
+                                            countProducts++;
+                                        }
 
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child("count").setValue(countProductsInCategories+1);
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("name").setValue(sendProducts.getName());
-                                        //myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("barCode").setValue(code);
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("productionDate").setValue(sendProducts.getProductionDate());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("validUntilDate").setValue(sendProducts.getValidUntilDate());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("notificationTime").setValue(sendProducts.getNotificationTime());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("notificationDate").setValue(sendProducts.getNotificationDate());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("category").setValue(sendProducts.getCategory());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("count").setValue(sendProducts.getCountProd());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("value").setValue(sendProducts.getValue());
-                                        myRef.child(phone).child("categories").child(sendProducts.getCategory()).child(String.valueOf(countProductsInCategories)).child("imagePath").setValue(sendProducts.getImagePath());
-                                        countProducts++;
-                                        countProductsInCategories++;
-                                        currentCategory = sendProducts.getCategory();
                                     }
 
                                 }
-
+                                Toast.makeText(getContext(),"Записи о продуктах успешно отправлены",Toast.LENGTH_LONG).show();
+                                counterFor = 0;
+                            } catch (Exception e) {
+                                Toast.makeText(getContext(),"Пользователя с данным номером телефона не существует",Toast.LENGTH_LONG).show();
                             }
 
 
-
-
-                            counterFor = 0;
 
                         }
 

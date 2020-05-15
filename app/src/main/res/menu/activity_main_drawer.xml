@@ -8,17 +8,17 @@
 
             android:checked="false"
             android:id="@+id/nav_products"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_products"
             android:title="Мои продукты" />
         <item
             android:checked="false"
             android:id="@+id/nav_tools"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_pdf"
             android:title="Импорт в PDF" />
         <item
             android:checked="false"
             android:id="@+id/nav_send"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_web"
             android:title="Отправить запись" />
     </group>
 

@@ -61,11 +61,12 @@ public class LoginActivity extends AppCompatActivity {
 
         preferences = getDefaultSharedPreferences(getBaseContext());
 
-        if(mAuth.getCurrentUser() != null){
+        if(!preferences.getBoolean("isFirst",true)){
             Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-
             startActivity(intent);
         }
+
+
 
         sendCode =(Button)findViewById(R.id.sendCode);
         verify =(Button)findViewById(R.id.signIn);
@@ -103,7 +104,10 @@ public class LoginActivity extends AppCompatActivity {
                 if (code.equals("")) {
                     Toast.makeText(LoginActivity.this, "Вы не ввели код подтверждения", Toast.LENGTH_LONG).show();
                 }else{
-                    verifyPhoneNumberWithCode(mVerificationId,code);            //call function for verify code
+                    if (mVerificationId != null){
+                        verifyPhoneNumberWithCode(mVerificationId,code);
+                    }
+                                //call function for verify code
                 }
 
 
@@ -175,6 +179,8 @@ public class LoginActivity extends AppCompatActivity {
 
                             Intent intent = new Intent(LoginActivity.this,MainActivity.class);
                             startActivity(intent);
+                            editor.putBoolean("isFirst",false);
+                            editor.apply();
 
                         } else {
                             // Sign in failed, display a message and update the UI
@@ -262,5 +268,12 @@ public class LoginActivity extends AppCompatActivity {
                 // [END_EXCLUDE]
             }
         };
+    }
+    public void onBackPressed() {
+        // super.onBackPressed();
+        Intent i = new Intent(Intent.ACTION_MAIN);
+        i.addCategory(Intent.CATEGORY_HOME);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
     }
 }

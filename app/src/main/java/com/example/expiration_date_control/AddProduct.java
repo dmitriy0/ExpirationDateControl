@@ -8,9 +8,12 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -78,6 +81,9 @@ public class AddProduct extends AppCompatActivity {
     long notificationTime;
     long productionDate;
     long notificationDate;
+    long currentDate;
+    int hour;
+    int minute;
     Calendar date = Calendar.getInstance();
 
     private StorageReference mStorageRef;
@@ -108,6 +114,7 @@ public class AddProduct extends AppCompatActivity {
     ImageView setProdDate;
     ImageView setPhoto;
     ImageView setBarCodePhoto;
+    ImageView setNotificationTime;
 
     Button addNewProduct;
     Button cancel;
@@ -126,7 +133,7 @@ public class AddProduct extends AppCompatActivity {
 
     String productOrBarCode;
 
-
+    public static final int REQUEST_CODE=101;
 
     int counterFor;
 
@@ -165,6 +172,8 @@ public class AddProduct extends AppCompatActivity {
         prodDate = findViewById(R.id.prodDate);
         validUntil = findViewById(R.id.validUntil);
 
+        currentDate = Calendar.getInstance().getTimeInMillis();
+
         radioValidUntil_ProdDate = (RadioGroup) findViewById(R.id.radioValidUntil_ProdDate);
 
         spinnerDaysBeforeNotification = findViewById(R.id.daysBeforeNotification);
@@ -176,7 +185,7 @@ public class AddProduct extends AppCompatActivity {
         layoutShelfLife = findViewById(R.id.layoutShelfLife);
 
         textNotificationDate = (TextView) findViewById(R.id.notificationDate);
-        textNotificationTime = (TextView) findViewById(R.id.setNotificationTime);
+        textNotificationTime = (TextView) findViewById(R.id.notificationTime);
 
         editTextShelfLife = findViewById(R.id.shelfLife);
         editName = findViewById(R.id.name);
@@ -186,6 +195,7 @@ public class AddProduct extends AppCompatActivity {
         setProdDate = (ImageView) findViewById(R.id.setProdDate);
         setPhoto = (ImageView) findViewById(R.id.setProductPhoto);
         setBarCodePhoto = (ImageView) findViewById(R.id.setBarCodePhoto);
+        setNotificationTime = (ImageView) findViewById(R.id.setNotificationTime);
 
         addNewProduct = (Button) findViewById(R.id.addNewProduct);
         cancel = (Button) findViewById(R.id.cancel);
@@ -303,6 +313,10 @@ public class AddProduct extends AppCompatActivity {
                     date.set(Calendar.YEAR, year);
                     date.set(Calendar.MONTH, monthOfYear);
                     date.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    date.set(Calendar.HOUR_OF_DAY,0);
+                    date.set(Calendar.MINUTE,0);
+                    date.set(Calendar.SECOND,0);
+                    date.set(Calendar.MILLISECOND,0);
 
                     setInitialDateTime();
                 }
@@ -339,6 +353,10 @@ public class AddProduct extends AppCompatActivity {
                     date.set(Calendar.YEAR, year);
                     date.set(Calendar.MONTH, monthOfYear);
                     date.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    date.set(Calendar.HOUR_OF_DAY,0);
+                    date.set(Calendar.MINUTE,0);
+                    date.set(Calendar.SECOND,0);
+                    date.set(Calendar.MILLISECOND,0);
 
                     validUntilDate = date.getTimeInMillis();
 
@@ -359,7 +377,7 @@ public class AddProduct extends AppCompatActivity {
         });
 
 
-        textNotificationTime.setOnClickListener(new View.OnClickListener() {
+        setNotificationTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -372,11 +390,11 @@ public class AddProduct extends AppCompatActivity {
             }
 
             TimePickerDialog.OnTimeSetListener timePicker = new TimePickerDialog.OnTimeSetListener() {
-                public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                public void onTimeSet(TimePicker view, int hourOfDay, int minuteOfDay) {
                     date.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                    date.set(Calendar.MINUTE, minute);
+                    date.set(Calendar.MINUTE, minuteOfDay);
 
-                    notificationTime = date.getTimeInMillis();
+                    notificationTime = hourOfDay*3600*1000+minuteOfDay*60*1000;
 
                     setInitialDateTime();
                 }
@@ -384,6 +402,8 @@ public class AddProduct extends AppCompatActivity {
 
 
             private void setInitialDateTime() {
+
+                setNotificationDate();
 
                 textNotificationTime.setText(DateUtils.formatDateTime(AddProduct.this,
                         date.getTimeInMillis(),
@@ -507,10 +527,11 @@ public class AddProduct extends AppCompatActivity {
                                     myRef.child(phoneNumber).child("allProducts").child("count").setValue(count+1);
                                 }
 
-                                if (!dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("name").getValue(String.class).equals(name)){
-                                    imagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").getValue(String.class);
-                                    codeImagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").getValue(String.class)+"barcode";
+                                if (dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("name").getValue(String.class) != null){
+                                        imagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").getValue(String.class);
+                                        codeImagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").getValue(String.class)+"barcode";
                                 }
+
 
 
                                 if (selectedImage != null) {
@@ -541,9 +562,38 @@ public class AddProduct extends AppCompatActivity {
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("value").setValue(value);
                                 myRef.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").setValue(imagePath);
 
+                                Intent alarmIntent = new Intent(AddProduct.this, AlarmReceiver.class);
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(AddProduct.this, count, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+
+                                if (android.os.Build.VERSION.SDK_INT >= 23) {
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putInt(notificationDate+notificationTime+"id",count);
+                                    editor.putString(notificationDate+notificationTime+"","Снять "+name+" Годен до "+DateUtils.formatDateTime(AddProduct.this,
+                                            validUntilDate,
+                                            DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
+                                    editor.apply();
+                                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, notificationDate + notificationTime, pendingIntent);
+                                }
+                                else{
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putInt(notificationDate+notificationTime+"id",count);
+                                    editor.putString(notificationDate+notificationTime+"","Снять "+name+" Годен до "+DateUtils.formatDateTime(AddProduct.this,
+                                            validUntilDate,
+                                            DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
+                                    editor.apply();
+                                    alarmManager.set(AlarmManager.RTC_WAKEUP, notificationDate + notificationTime, pendingIntent);
+                                }
+
+                                if (intent.getIntExtra("number",-1) != -1){
+                                    Intent intent1 = new Intent(AddProduct.this,MainActivity.class);
+                                    startActivity(intent1);
+                                    Toast.makeText(AddProduct.this, "Запись успешно добавлена ", Toast.LENGTH_LONG).show();
+                                }
+
 
                                 counterFor = 0;
-
                             }
 
 
@@ -554,8 +604,6 @@ public class AddProduct extends AppCompatActivity {
 
                         }
                     });
-                    Intent intent = new Intent(AddProduct.this,MainActivity.class);
-                    startActivity(intent);
 
                 }
 
@@ -646,7 +694,7 @@ public class AddProduct extends AppCompatActivity {
                 }
             }
         }else{
-            notificationDate = validUntilDate - daysBeforeNotification * 24 * 3600 * 1000;
+            notificationDate = validUntilDate - daysBeforeNotification * 24 * 3600 * 1000 ;
             textNotificationDate.setText(DateUtils.formatDateTime(AddProduct.this,
                     validUntilDate - daysBeforeNotification * 24 * 3600 * 1000,
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
@@ -677,7 +725,7 @@ public class AddProduct extends AppCompatActivity {
                         progressDialog.dismiss();
                         Intent intent = new Intent(AddProduct.this,MainActivity.class);
                         startActivity(intent);
-                        Toast.makeText(AddProduct.this, "File Uploaded ", Toast.LENGTH_LONG).show();
+                        Toast.makeText(AddProduct.this, "Запись успешно добавлена ", Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

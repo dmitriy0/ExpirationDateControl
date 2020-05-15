@@ -63,15 +63,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="5dp"
                 android:ems="10"
                 android:text="Выберите дату" />
 
             <ImageView
                 android:id="@+id/setProdDate"
+                android:padding="2dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/ic_menu_manage" />
+                app:srcCompat="@drawable/ic_calendar" />
 
 
         </LinearLayout>
@@ -99,6 +101,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="5dp"
                     android:ems="10"
                     android:text="Выберите дату" />
 
@@ -107,7 +110,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:srcCompat="@drawable/ic_menu_manage" />
+                    android:padding="2dp"
+                    app:srcCompat="@drawable/ic_calendar" />
 
             </LinearLayout>
 
@@ -211,12 +215,21 @@
                 android:text="Поставить напоминание" />
 
             <TextView
-                android:id="@+id/setNotificationTime"
+                android:id="@+id/notificationTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
                 android:ems="10"
-                android:text="нажмите чтобы выбрать время" />
+                android:text="Выберите время" />
+
+            <ImageView
+                android:id="@+id/setNotificationTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="2dp"
+                app:srcCompat="@drawable/ic_clock" />
         </LinearLayout>
 
         <LinearLayout
@@ -305,13 +318,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="bottom"
+            android:layout_marginBottom="10dp"
+            android:gravity="bottom|center"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/addNewProduct"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/button_gradient"
                 android:layout_weight="1"
                 android:text="добавить продукт" />
 
@@ -319,6 +335,8 @@
                 android:id="@+id/cancel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/button_gradient"
                 android:layout_weight="1"
                 android:text="Отмена" />
         </LinearLayout>

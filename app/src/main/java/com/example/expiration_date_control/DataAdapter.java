@@ -32,6 +32,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -48,6 +50,7 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     private long time;
     private long date;
+    private long notificationDate;
     private Context context;
 
     private StorageReference mStorageRef;
@@ -76,12 +79,16 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         context = products.getContext();
         time = products.getNotificationTime();
         date = products.getValidUntilDate();
+        notificationDate = products.getNotificationDate();
 
         String description = products.getName() + " " + products.getCountProd() + " " + products.getValue() + ". " + "до " + DateUtils.formatDateTime(products.getContext(), date, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
 
         holder.timeView.setText(DateUtils.formatDateTime(products.getContext(),
-                time,
+                time+notificationDate,
                 DateUtils.FORMAT_SHOW_TIME));
+        holder.dateView.setText(DateUtils.formatDateTime(products.getContext(),
+                notificationDate,
+                DateUtils.FORMAT_SHOW_WEEKDAY|DateUtils.FORMAT_ABBREV_WEEKDAY|DateUtils.FORMAT_SHOW_DATE|DateUtils.FORMAT_NUMERIC_DATE|DateUtils.FORMAT_SHOW_YEAR));
 
         holder.descriptionView.setText(description);
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -112,6 +119,8 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                             public void onDataChange(DataSnapshot dataSnapshot) {
 
                                 int countProducts = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
+                                myRef.child(phoneNumber).child("allProducts").child("count").setValue(countProducts - 1);
+                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(products.getNumber())).removeValue();
                                 for (int j = products.getNumber()+1; j < countProducts;j++) {
                                     String name = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("name").getValue(String.class);
                                     myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("name").setValue(name);
@@ -135,16 +144,18 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                                     myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationDate").setValue(notificationDate);
 
                                     Long validUntilDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("validUntilDate").getValue(Long.class);
-                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationDate").setValue(validUntilDate);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("validUntilDate").setValue(validUntilDate);
 
                                     Long notificationTime = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(j)).child("notificationTime").getValue(Long.class);
-                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationDate").setValue(notificationTime);
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j-1)).child("notificationTime").setValue(notificationTime);
+
+                                    myRef.child(phoneNumber).child("allProducts").child(String.valueOf(j)).removeValue();
 
                                 }
-                                myRef.child(phoneNumber).child("allProducts").child("count").setValue(countProducts - 1);
-                                myRef.child(phoneNumber).child("allProducts").child(String.valueOf(products.getNumber())).removeValue();
 
 
+                                Intent intent = new Intent(products.getActivity(),MainActivity.class);
+                                startActivity(products.getContext(),intent,null);
 
 
                             }
@@ -201,10 +212,10 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         final ImageView imageView, imageDelete,imageEdit;
-        final TextView descriptionView, timeView;
+        final TextView descriptionView, timeView,dateView;
         ViewHolder(View view){
             super(view);
-
+            dateView = (TextView) view.findViewById(R.id.notificationDate);
             imageView = (ImageView)view.findViewById(R.id.productImage);
             imageDelete = (ImageView)view.findViewById(R.id.imageViewDelete);
             imageEdit = (ImageView)view.findViewById(R.id.imageViewEdit);
