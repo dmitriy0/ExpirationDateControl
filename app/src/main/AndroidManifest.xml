@@ -35,6 +35,10 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".DeleteReceiver">
+        </receiver>
+
 
         <activity android:name=".AddProduct"
             android:screenOrientation="portrait">

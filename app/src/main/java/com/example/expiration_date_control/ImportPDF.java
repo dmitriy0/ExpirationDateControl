@@ -353,12 +353,16 @@ public class ImportPDF extends Fragment {
 
                     } catch (Exception e) {
                         e.printStackTrace();
+                        Toast.makeText(getContext(), "Что-то пошло не так , попробуйте еще раз" + FILE, Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     // Failed to read value
+                    Toast.makeText(getContext(), "Что-то пошло не так , попробуйте еще раз" + FILE, Toast.LENGTH_LONG).show();
+                    progressDialog.dismiss();
                 }
             });
 

@@ -81,10 +81,16 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         date = products.getValidUntilDate();
         notificationDate = products.getNotificationDate();
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, (int) (time/3600000));
+        calendar.set(Calendar.MINUTE, (int) ((time%3600000)/60000));
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
         String description = products.getName() + " " + products.getCountProd() + " " + products.getValue() + ". " + "до " + DateUtils.formatDateTime(products.getContext(), date, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
 
         holder.timeView.setText(DateUtils.formatDateTime(products.getContext(),
-                time+notificationDate,
+                calendar.getTimeInMillis(),
                 DateUtils.FORMAT_SHOW_TIME));
         holder.dateView.setText(DateUtils.formatDateTime(products.getContext(),
                 notificationDate,

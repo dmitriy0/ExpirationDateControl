@@ -505,6 +505,8 @@ public class MyProducts extends Fragment {
                                 productionDate = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("productionDate").getValue(Long.class);
                                 category = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(i)).child("category").getValue(String.class);
                                 products.add(new MyProductsForRecyclerView(name,countProd,value,imagePath,notificationTime,notificationDate, validUntilDate, productionDate, category,i,getContext(),getActivity()));
+
+
                             }
                         }else{
                             count = dataSnapshot.child(phoneNumber).child("allProducts").child("count").getValue(Integer.class);
@@ -529,7 +531,7 @@ public class MyProducts extends Fragment {
                         Collections.sort(products, new Comparator<MyProductsForRecyclerView>() {
                             @Override
                             public int compare(MyProductsForRecyclerView myProductsForRecyclerView, MyProductsForRecyclerView t1) {
-                                return (myProductsForRecyclerView.validUntilDate+"").compareTo(t1.validUntilDate+"");
+                                return (myProductsForRecyclerView.validUntilDate+notificationTime+"").compareTo(t1.validUntilDate+notificationTime+"");
                             }
 
                         });

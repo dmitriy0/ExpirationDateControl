@@ -82,9 +82,9 @@ public class AddProduct extends AppCompatActivity {
     long productionDate;
     long notificationDate;
     long currentDate;
-    int hour;
-    int minute;
     Calendar date = Calendar.getInstance();
+    Date time = new Date(0);
+
 
     private StorageReference mStorageRef;
 
@@ -230,10 +230,18 @@ public class AddProduct extends AppCompatActivity {
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
         }
 
+
+
         if (intent.getLongExtra("notificationTime",-1) != -1){
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, (int) (intent.getLongExtra("notificationTime",-1)/3600000));
+            calendar.set(Calendar.MINUTE, (int) ((intent.getLongExtra("notificationTime",-1)%3600000)/60000));
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
             notificationTime = intent.getLongExtra("notificationTime",-1);
             textNotificationTime.setText(DateUtils.formatDateTime(AddProduct.this,
-                    intent.getLongExtra("notificationTime",-1),
+                    calendar.getTimeInMillis(),
                     DateUtils.FORMAT_SHOW_TIME));
         }
 
@@ -531,8 +539,6 @@ public class AddProduct extends AppCompatActivity {
                                         imagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").getValue(String.class);
                                         codeImagePath = dataSnapshot.child(phoneNumber).child("allProducts").child(String.valueOf(count)).child("imagePath").getValue(String.class)+"barcode";
                                 }
-
-
 
                                 if (selectedImage != null) {
 

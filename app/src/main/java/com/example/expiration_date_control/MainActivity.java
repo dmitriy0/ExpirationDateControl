@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     String category;
 
     private AppBarConfiguration mAppBarConfiguration;
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,17 +107,18 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
+
         final FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this,AddProduct.class);
-                intent.putExtra("name","");
-                intent.putExtra("category","Непродовольственные товары");
-                intent.putExtra("countProd","0");
-                intent.putExtra("value","шт");
-                intent.putExtra("imagePath","");
-                intent.putExtra("barcodeImagePath","");
+                Intent intent = new Intent(MainActivity.this, AddProduct.class);
+                intent.putExtra("name", "");
+                intent.putExtra("category", "Непродовольственные товары");
+                intent.putExtra("countProd", "0");
+                intent.putExtra("value", "шт");
+                intent.putExtra("imagePath", "");
+                intent.putExtra("barcodeImagePath", "");
                 startActivity(intent);
             }
         });
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         toggle.syncState();
 
         SharedPreferences preferences = getDefaultSharedPreferences(this);
-        final String phoneNumber = preferences.getString("phoneNumber","");
+        final String phoneNumber = preferences.getString("phoneNumber", "");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "name";
@@ -143,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
-        
+
         NavigationView navigationView = findViewById(R.id.nav_view);
 
         Fragment fragment = null;
@@ -203,39 +205,23 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
 
-    }
-
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.container);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
-
-    public void onBackPressed() {
-        // super.onBackPressed();
-        Intent i = new Intent(Intent.ACTION_MAIN);
-        i.addCategory(Intent.CATEGORY_HOME);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "aaaa";
-            String description = "gdfvdfv";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("chanel", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
         }
+
+
+        @Override
+        public boolean onSupportNavigateUp () {
+            NavController navController = Navigation.findNavController(this, R.id.container);
+            return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                    || super.onSupportNavigateUp();
+        }
+
+        public void onBackPressed () {
+            // super.onBackPressed();
+            Intent i = new Intent(Intent.ACTION_MAIN);
+            i.addCategory(Intent.CATEGORY_HOME);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+        }
+
+
     }
-
-
-}

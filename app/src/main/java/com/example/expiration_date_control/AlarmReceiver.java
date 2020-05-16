@@ -33,8 +33,13 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         Intent intent1 = new Intent(context, MainActivity.class);
         intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
         PendingIntent pendingIntent1 = PendingIntent.getActivity(context, 0, intent1, 0);
+
+        Intent snoozeIntent = new Intent(context, DeleteReceiver.class);
+        snoozeIntent.putExtra("action","delete");
+        snoozeIntent.putExtra("number",id);
+        PendingIntent snoozePendingIntent = PendingIntent.getBroadcast(context, 0, snoozeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "chanel")
                 .setSmallIcon(R.drawable.ic_arrow)
                 .setContentTitle(title)
@@ -42,6 +47,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent1)
+                .addAction(R.drawable.ic_calendar, "Снять", snoozePendingIntent)
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
